@@ -1,10 +1,26 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useState } from "react";
 import { TextInput } from "react-native-gesture-handler";
+import firebase from "../database/firebaseDB";
+import { useNavigation } from "@react-navigation/native";
+const auth = firebase.auth();
 
 export default function LoginScreen() {
+  const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorText, setErrorText] = useState("");
+
+  async function login() {
+    try {
+      await auth.signInWithEmailAndPassword(email, password);
+      navigation.navigate("Chat");
+    } catch (error) {
+      setErrorText(error.message);
+      console.log(error);
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Chat App</Text>
@@ -25,14 +41,22 @@ export default function LoginScreen() {
         value={password}
         onChangeText={(text) => setPassword(text)}
       />
-      <TouchableOpacity style={styles.loginButton} onPress={null}>
-        <Text style={styles.buttonText}>Log In</Text>
-      </TouchableOpacity>
+      <View style={styles.btnContainer}>
+        <TouchableOpacity style={styles.loginButton} onPress={login}>
+          <Text style={styles.buttonText}>Log In</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.errorText}>{errorText}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  errorText: {
+    color: "red",
+    marginVertical: 20,
+    textAlign: "center",
+  },
   container: {
     flex: 1,
     justifyContent: "center",
@@ -55,6 +79,7 @@ const styles = StyleSheet.create({
     height: 36,
     fontSize: 18,
     backgroundColor: "white",
+    borderRadius: 6,
   },
   loginButton: {
     backgroundColor: "blue",
@@ -63,6 +88,11 @@ const styles = StyleSheet.create({
     padding: 18,
     marginTop: 12,
     marginBottom: 36,
+    borderRadius: 6,
+  },
+  btnContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
   },
   buttonText: {
     color: "white",
